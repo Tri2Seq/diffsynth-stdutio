@@ -1,0 +1,8 @@
+*.png
+*pycache*
+*.safetensors
+*.ckpt
+models/
+*.log
+*.html
+*.jpg

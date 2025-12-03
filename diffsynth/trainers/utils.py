@@ -548,9 +548,9 @@ def launch_training_task(
         kwargs_handlers=[DistributedDataParallelKwargs(find_unused_parameters=find_unused_parameters)],
     )
     model, optimizer, dataloader, scheduler = accelerator.prepare(model, optimizer, dataloader, scheduler)
-    
     for epoch_id in range(num_epochs):
-        for data in tqdm(dataloader):
+        progress_bar = tqdm(dataloader, desc="loss: N/A")
+        for data in progress_bar:
             with accelerator.accumulate(model):
                 optimizer.zero_grad()
                 if dataset.load_from_cache:
@@ -561,6 +561,7 @@ def launch_training_task(
                 optimizer.step()
                 model_logger.on_step_end(accelerator, model, save_steps)
                 scheduler.step()
+                progress_bar.set_description(f"loss: {loss.item():.4f}")
         if save_steps is None:
             model_logger.on_epoch_end(accelerator, model, epoch_id)
     model_logger.on_training_end(accelerator, model, save_steps)
@@ -655,6 +656,7 @@ def flux_parser():
     parser.add_argument("--save_steps", type=int, default=None, help="Number of checkpoint saving invervals. If None, checkpoints will be saved every epoch.")
     parser.add_argument("--dataset_num_workers", type=int, default=0, help="Number of workers for data loading.")
     parser.add_argument("--weight_decay", type=float, default=0.01, help="Weight decay.")
+    parser.add_argument("--default_caption", type=str, default="Convert this image into a line art comic style. Keep the scenes and characters unchanged, present it as a black-and-white sketch, and use it for storyboard design.With tough lines and rich details, it focuses on shaping structures and textures with simple lines, and the style tends to be a realistic sketch. Cross-hatching is used to create simple light and shadow.", help="Default caption for images without captions in the dataset.")
     return parser
 
 

@@ -242,8 +242,9 @@ class UnifiedDataset(torch.utils.data.Dataset):
         data_file_keys=tuple(),
         main_data_operator=lambda x: x,
         special_operator_map=None,
-    ):
+        default_caption=None,):
         self.base_path = base_path
+        self.default_caption = default_caption
         self.metadata_path = metadata_path
         self.repeat = repeat
         self.data_file_keys = data_file_keys
@@ -310,6 +311,21 @@ class UnifiedDataset(torch.utils.data.Dataset):
                 for line in f:
                     metadata.append(json.loads(line.strip()))
             self.data = metadata
+        elif metadata_path.endswith(".txt"):
+            with open(metadata_path, "r") as f:
+                lines = f.readlines()
+            # self.data_file_keys: image, kontext_images 1x2
+            # lines nx2
+            self.data = []
+            for line in lines:
+                items = line.strip().split("\t")
+                data_entry = {}
+                for key, item in zip(self.data_file_keys, items):
+                    data_entry[key] = item
+                # data_entry["prompt"] = self.default_caption 
+                
+                self.data.append(data_entry)
+                
         else:
             metadata = pandas.read_csv(metadata_path)
             self.data = [metadata.iloc[i].to_dict() for i in range(len(metadata))]
@@ -324,8 +340,10 @@ class UnifiedDataset(torch.utils.data.Dataset):
                 if key in data:
                     if key in self.special_operator_map:
                         data[key] = self.special_operator_map[key](data[key])
+                    elif key == "prompt":
+                        pass
                     elif key in self.data_file_keys:
-                        data[key] = self.main_data_operator(data[key])
+                        data[key] = self.main_data_operator(data[key]) 
         return data
 
     def __len__(self):

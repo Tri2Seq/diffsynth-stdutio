@@ -1,0 +1,18 @@
+accelerate launch --config_file examples/flux/model_training/full/accelerate_config.yaml examples/flux/model_training/train.py \
+  --dataset_base_path /fi-lib/workspace/sjx/dataset/sketch_body \
+  --dataset_metadata_path /fi-lib/workspace/sjx/DiffSynth-Studio/dataset/sketch_body/pairs.txt \
+  --data_file_keys "image,kontext_images" \
+  --max_pixels 1048576 \
+  --dataset_repeat 400 \
+  --model_id_with_origin_paths "black-forest-labs/FLUX.1-Kontext-dev:flux1-kontext-dev.safetensors,black-forest-labs/FLUX.1-Kontext-dev:text_encoder/model.safetensors,black-forest-labs/FLUX.1-Kontext-dev:text_encoder_2/,black-forest-labs/FLUX.1-Kontext-dev:ae.safetensors" \
+  --learning_rate 1e-4 \
+  --num_epochs 5 \
+  --remove_prefix_in_ckpt "pipe.dit." \
+  --output_path "./models/train/FLUX.1_lora_1125" \
+  --lora_base_model "dit" \
+  --lora_target_modules "a_to_qkv,b_to_qkv,ff_a.0,ff_a.2,ff_b.0,ff_b.2,a_to_out,b_to_out,proj_out,norm.linear,norm1_a.linear,norm1_b.linear,to_qkv_mlp" \
+  --lora_rank 32 \
+  --align_to_opensource_format \
+  --extra_inputs "kontext_images" \
+  --use_gradient_checkpointing \
+  --default_caption "Convert this real photo into a storyboard style + human dynamic structural sketch. Core requirements: 1. Preserve the original composition, scene elements (such as props and environmental layout), and human movements, fully restoring the narrative logic of the image; 2. Characters are depicted with concise and smooth structural sketch lines, highlighting human skeletal and muscular dynamic structures, without realistic lighting, colors, or detailed textures—only presenting a black-and-white structural feel suitable for drawing practice; 3. The overall image adopts a storyboard frame presentation, with clear and neat lines; background elements are simplified into minimalist line outlines, maintaining the original artistic tone and narrative atmosphere of the image, using only black and white color scheme, with no redundant decorations."

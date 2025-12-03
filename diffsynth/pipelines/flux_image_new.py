@@ -30,7 +30,15 @@ from ..lora.flux_lora import FluxLoRALoader, FluxLoraPatcher, FluxLoRAFuser
 from ..models.flux_dit import RMSNorm
 from ..vram_management import gradient_checkpoint_forward, enable_vram_management, AutoWrappedModule, AutoWrappedLinear
 
-
+def visualize_inputs(inputs: dict):
+    # save the image for debug
+    print(f"### prompt = {inputs.get('prompt', '')} ###")
+    # img = inputs['input_image'].detach().cpu().numpy().transpose(0, 2, 3, 1)[0]
+    img = inputs['input_image'].save("debug_input_image.png")
+    img_vae = inputs['input_latents'].to(torch.float32).detach().cpu().numpy().transpose(0, 2, 3, 1)[0, :, :, :3]
+    img_vae = ((img_vae + 1) * 127.5).astype(np.uint8)
+    Image.fromarray(img_vae).save("debug_input_image_vae.png")
+    print("### input image saved to debug_input_image.png ###")
 
 @dataclass
 class ControlNetInput:

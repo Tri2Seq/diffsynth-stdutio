@@ -40,14 +40,15 @@ class FluxTrainingModule(DiffusionTrainingModule):
         # CFG-sensitive parameters
         inputs_posi = {"prompt": data["prompt"]}
         inputs_nega = {"negative_prompt": ""}
+        resized_data = data["image"].resize((1024,1024))
         
         # CFG-unsensitive parameters
         inputs_shared = {
             # Assume you are using this pipeline for inference,
             # please fill in the input parameters.
-            "input_image": data["image"],
-            "height": data["image"].size[1],
-            "width": data["image"].size[0],
+            "input_image": resized_data,
+            "height": resized_data.size[1],
+            "width": resized_data.size[0],
             # Please do not modify the following parameters
             # unless you clearly know what this will cause.
             "cfg_scale": 1,
@@ -98,7 +99,8 @@ if __name__ == "__main__":
             width=args.width,
             height_division_factor=16,
             width_division_factor=16,
-        )
+        ),
+        default_caption=args.default_caption
     )
     model = FluxTrainingModule(
         model_paths=args.model_paths,
