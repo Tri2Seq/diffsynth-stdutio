@@ -27,7 +27,7 @@ def base64_to_image(base64_str):
     return image_pil
 class GeminiImageGenerator:
     def __init__(self,  api_url: str = "https://api.apiyi.com/v1beta/models/gemini-3-pro-image-preview:generateContent"):
-        self.api_key = "sk-MC5B3H948s5YhiVN591f578fC74a4eC484659cC6005bB603"
+        self.api_key = "sk-ooPY7VxCXOfumS59E5E4E21474E54c32866b08D62b11D29e"
         self.api_url = api_url
         self.api_url_compre="https://api.apiyi.com/v1/chat/completions"
         self.headers = {
@@ -301,44 +301,68 @@ class GeminiImageGenerator:
 if __name__=="__main__":
     g = GeminiImageGenerator()
     # 描述性提示词（根据需要修改）
-    prompt = """You are a concise storyboard narrator focused on core scene and composition description. Based on the 1 vertically stitched image containing multiple storyboards (identified as Storyboard 1 to Storyboard N in top-to-bottom order, N = actual number), output ONLY a simple story background and concise composition descriptions for each shot. Strictly follow the JSON format below, with each "Image Composition" limited to ~100 words:
-{"Simple Story Background": "1-2 sentences summarizing the basic story context (e.g., 'A girl searches for her lost cat in a suburban neighborhood on a sunny afternoon')","Storyboard_List": [{"Shot Number": 1,"Scene": "Specific location (e.g., front yard of a cottage, forest trail, downtown café)","Image Composition": "Concise description of characters (appearance, posture), key props, framing (shot type: close-up/medium/long/wide), lighting, and core visual elements (max 100 words)","Emotional Tone": "Brief atmosphere (e.g., warm, tense, peaceful)"},{"Shot Number": N,"Scene": "Same as above","Image Composition": "Same as above (max 100 words)","Emotional Tone": "Same as above"}]}
-Requirements
-All fields are mandatory; no redundant content.
-"Image Composition" focuses only on critical visual information (characters, framing, key props, lighting) – no excessive details.
-Strictly match the number/order of storyboards in the image (top-to-bottom numbering).
-JSON format must be error-free, ready for direct use.
-No extra text outside the JSON structure."""
+    prompt = """You are a storyteller skilled in interpreting visual narratives. You can extract core information from storyboard images, organize a complete story logic, supplement rich and contextually fitting detailed descriptions, and possess rigorous JSON format output capabilities. Based on the 6 storyboard images I provide (arranged in 3 rows and 2 columns, ordered from left to right and top to bottom), first organize the complete story structure collectively told by the images, then generate corresponding visual descriptions for each image. Strictly output in the following JSON format, ensuring coherent story logic, accurate visual details, and concise responses:
+{"story_summary": "Briefly narrate the story thread connected by the 6 images in 10-20 words","storyboard_list": [{"shot_number": 1,"visual_content": "Detailedly describe the scene environment (light, color, prop arrangement), characters (appearance, clothing, gestures, facial expressions), and key details (e.g., items held by characters, special symbols in the background, light and shadow changes) in the image. You can supplement reasonable details based on existing image elements to make the scene more vivid (less than 30 words)"},{"shot_number": 2,"visual_content": "Same as above"}]}"""
+    base_dirs = [
+            "/fi-lib/workspace/sjx/DiffSynth-Studio/dataset/no_other_choice",
+            "/fi-lib/workspace/sjx/DiffSynth-Studio/dataset/the_roses"
+            "/fi-lib/workspace/sjx/DiffSynth-Studio/dataset/nouvelle",
+            "/fi-lib/workspace/sjx/DiffSynth-Studio/dataset/frankenstein"
+        ]
+    issues0=[52,292,308,344,357] # no other choice 362
+    issues1=[32,291,298,300,301,301] # the roses 302
+    issues2=[31,40,96] # nouvelle 96 
+    issues3=[32,291,298,300,301,301] # frankenstein 462
 
-    INPUT_DIR = "dataset/spotlight_sketch_cat/GT"
-    OUTPUT_DIR = "dataset/spotlight_sketch_cat"
-    RATIO = "16:9"
-    # 对输入文件夹内的图片进行排序处理
 
-    output_path = os.path.join(OUTPUT_DIR, "spotlight_nano_comprehension_1203.txt")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    input_files = sorted(
-        fname for fname in os.listdir(INPUT_DIR)
-        if os.path.isfile(os.path.join(INPUT_DIR, fname))
-    )
 
-    for idx, fname in tqdm(enumerate(input_files), total=len(input_files)):
-        src_path = os.path.join(INPUT_DIR, fname)
-        # 调用nano_image_comprehension
-        # try:
-        # pil_in = Image.open(src_path).convert("RGB")
+    for k in range(len(base_dirs)):
+        print(base_dirs[k])
+        # INPUT_DIR = "dataset/no_other_choice_train/GT_cat"
+        INPUT_DIR = f"{base_dirs[k]}_train/GT_cat"
+        # OUTPUT_DIR = "dataset/no_other_choice_train"
+        OUTPUT_DIR =f"{base_dirs[k]}_train"
 
-        result = g.nano_image_comprehension({
-            "image": src_path,
-        },prompt)
-        base_name = os.path.splitext(fname)[0]
-        with open(output_path, "a", encoding="utf-8") as f:
-            result = result.replace("\n", "")
-            result = result.replace("```", "")
-            result = result.replace("json", "")
-            result = result.replace('"Simple Story Background"', f'"Image_Name": "{base_name}", "Simple Story Background"')
+        RATIO = "16:9"
+        # 对输入文件夹内的图片进行排序处理
 
-            f.write(result.strip("\n") + "\n")
-        # except Exception as e:
-        #     print(f"处理文件 {fname} 时出错: {e}")
+        output_path = os.path.join(OUTPUT_DIR, "GT_cat_i2t.txt")
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+        input_files = sorted(
+            fname for fname in os.listdir(INPUT_DIR)
+            if os.path.isfile(os.path.join(INPUT_DIR, fname))
+        )
+
+        for idx, fname in tqdm(enumerate(input_files), total=len(input_files)):
+            print(idx,fname)
+
+            # if idx < 37 :
+            #     print(fname)
+            #     continue
+            src_path = os.path.join(INPUT_DIR, fname)
+            # 调用nano_image_comprehension
+            # try:
+            # pil_in = Image.open(src_path).convert("RGB")
+            base_name = os.path.splitext(fname)[0]
+            if base_name.startswith("merged_"):
+                num = int(fname.split("_")[1].strip(".png"))
+                if num not in f"issues{k}":
+                    print("not inssue")
+                    continue
+            try:
+                result = g.nano_image_comprehension({
+                    "image": src_path,
+                },prompt)
+            except Exception as e:
+                print(f"处理文件 {fname} 时出错: {e}")
+                continue
+            with open(output_path, "a", encoding="utf-8") as f:
+                result = result.replace("\n", "")
+                result = result.replace("```", "")
+                result = result.replace("json", "")
+                result = result.replace('"story_summary"', f'"Image_Name": "{base_name}", "story_summary"')
+
+                f.write(result.strip("\n") + "\n")
+            

@@ -40,7 +40,7 @@ class FluxTrainingModule(DiffusionTrainingModule):
         # CFG-sensitive parameters
         inputs_posi = {"prompt": data["prompt"]}
         inputs_nega = {"negative_prompt": ""}
-        resized_data = data["image"].resize((1024,1024))
+        resized_data = data["image"]
         
         # CFG-unsensitive parameters
         inputs_shared = {

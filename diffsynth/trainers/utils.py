@@ -516,7 +516,27 @@ class ModelLogger:
             os.makedirs(self.output_path, exist_ok=True)
             path = os.path.join(self.output_path, file_name)
             accelerator.save(state_dict, path, safe_serialization=True)
+            self.run_visualization(accelerator,model)
+        accelerator.wait_for_everyone()
 
+    def run_visualization(self,accelerator, model):
+        prompt = "The man wolking on the road, wearing a lolita dress"
+        pipe = getattr(model, 'pipe', None)
+        if pipe is None:
+            print("[ModelLogger][Eval] Model has no 'pipe' attribute; skipping evaluation.")
+            return
+        with torch.no_grad():
+            image = pipe(
+                prompt = prompt,
+                height=768, width=768,# 改9
+                seed=0,
+                num_inference_steps=25 #
+            )
+        # image.save(os.path.join(save_path,fig))
+        save_path = os.path.join(self.output_path,"vis",str(self.num_steps)+".png")
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
+        image.save(save_path)# ♥哈哈哈这个这么小一号这个大❤嘿嘿
+        model.pipe.scheduler.set_timesteps(1000, training=True)
 
 def launch_training_task(
     dataset: torch.utils.data.Dataset,

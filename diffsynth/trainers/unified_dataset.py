@@ -318,11 +318,15 @@ class UnifiedDataset(torch.utils.data.Dataset):
             # lines nx2
             self.data = []
             for line in lines:
-                items = line.strip().split("\t")
+                # items = line.strip().split("\t")
+                if "\t" in line:
+                    items = line.strip().split("\t")
+                else:
+                    items = line.strip().split()
                 data_entry = {}
                 for key, item in zip(self.data_file_keys, items):
                     data_entry[key] = item
-                # data_entry["prompt"] = self.default_caption 
+                data_entry["prompt"] = self.default_caption
                 
                 self.data.append(data_entry)
                 

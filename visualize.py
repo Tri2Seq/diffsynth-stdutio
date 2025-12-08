@@ -5,16 +5,16 @@ from jinja2 import Environment, BaseLoader
 step = 4
 # 设置文件和文件夹路径
 caption_visualized_folders = [
-    f"test_1126_step4/GT",
-    f"test_1126_step4/epoch0",
-    f"test_1126_step10/epoch0",
-    f"test_1126_step25/epoch0",
-    f"test_1126_step{step}/epoch3",
-    f"test_1126_step{step}/epoch4"
+    f"dataset/spotlight_sketch_cat/GT",
+    f"dataset/spotlight_sketch_cat/epoch0"
+    # f"test_1126_step10/epoch0",
+    # f"test_1126_step25/epoch0",
+    # f"test_1126_step{step}/epoch3",
+    # f"test_1126_step{step}/epoch4"
 ]
 
 # 提取模型名称
-model_names = ["GT",  "step4_epoth0", "step10_epoth0","step25_epoth0","epoch3","epoch4"]
+model_names = ["GT",  "sktech"]
 
 # 图片格式映射：后缀名 -> MIME类型（用于Base64的data URI）
 IMG_EXT_TO_MIME = {
@@ -42,7 +42,7 @@ for folder in caption_visualized_folders:
 res_data = []
 for base in sorted(all_basenames):
     # 初始化前几个占位字段（模板主要使用索引后面的图片列）
-    res_row_info = [base, base, base, base, base, base]
+    res_row_info = [base, base]
 
     # 对每个文件夹按基名查找对应的图片，编码为Base64
     for folder in caption_visualized_folders:
@@ -110,18 +110,14 @@ template_string = """
             <tr>
                 <th>#</th>
                 <th>GT</th>
-                <th>step4_epoth0</th>
-                <th>step10_epoth0</th>
-                <th>step25_epoth0</th>
-                <th>epoch3</th>
-                <th>epoch4</th>
+                <th>sketch</th>
             </tr>
         </thead>
         <tbody>
         {% for row in data %}
             <tr>
                 <td>{{ loop.index }}</td>
-                {% for img_info in row[6:12] %}  {# 要改 #}
+                {% for img_info in row[2:4] %}  {# 要改 #}
                     <td>
                         {% if img_info.base64 %}
                             <img src="{{ img_info.base64 }}" alt="img">
@@ -143,7 +139,7 @@ template_string = """
 template = Environment(loader=BaseLoader).from_string(template_string)
 
 # 输出HTML文件
-output_html_path = f"showcase1127.html"
+output_html_path = f"showcase1203.html"
 with open(output_html_path, "w", encoding='utf-8') as f:
     f.write(template.render(data=res_data, model_names=model_names))
 

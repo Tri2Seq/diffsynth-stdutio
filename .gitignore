@@ -6,3 +6,5 @@ models/
 *.log
 *.html
 *.jpg
+dataset/
+logs/
