@@ -12,7 +12,7 @@ from io import BytesIO
 from tqdm import tqdm
 # from api_class.utils import base64_to_image,encode_pil_to_base64
 def encode_pil_to_base64(image_pil):
-    # 将PIL图像编码为base64字符串
+    # 将PIL图像编码为base64字符串 
     buffered = BytesIO()
     image_pil.save(buffered, format="PNG")
     img_bytes = buffered.getvalue()

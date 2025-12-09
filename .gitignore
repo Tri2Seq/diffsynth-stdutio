@@ -8,3 +8,13 @@ models/
 *.jpg
 dataset/
 logs/
+*.mkv
+*.mp4
+*.avi
+*.gif
+*.zip
+*.tar.gz
+*.pth
+*.pt
+*.bin
+*.nfo
